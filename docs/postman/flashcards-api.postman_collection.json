@@ -1,0 +1,200 @@
+{
+  "info": {
+    "name": "10xCards - Flashcards API",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Flashcards",
+      "item": [
+        {
+          "name": "Get Flashcards List",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/flashcards?page=1&limit=10&topic_id=test-topic&document_id=test-doc&source=ai&is_approved=false",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "flashcards"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "10"
+                },
+                {
+                  "key": "topic_id",
+                  "value": "test-topic"
+                },
+                {
+                  "key": "document_id",
+                  "value": "test-doc"
+                },
+                {
+                  "key": "source",
+                  "value": "ai"
+                },
+                {
+                  "key": "is_approved",
+                  "value": "false"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Generate AI Flashcards",
+          "request": {
+            "method": "POST",
+            "url": {
+              "raw": "{{baseUrl}}/api/flashcards/ai-generate",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "flashcards", "ai-generate"]
+            },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"text\": \"TypeScript to typowany nadzbiór JavaScript, który kompiluje się do czystego JavaScript. Dodaje opcjonalne typy, klasy i moduły do JavaScript.\",\n  \"document_id\": \"test-doc\",\n  \"topic_id\": \"test-topic\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Create Flashcards",
+          "request": {
+            "method": "POST",
+            "url": {
+              "raw": "{{baseUrl}}/api/flashcards",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "flashcards"]
+            },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"flashcards\": [\n    {\n      \"front_original\": \"Co to jest TypeScript?\",\n      \"back_original\": \"TypeScript to typowany nadzbiór JavaScript, który kompiluje się do czystego JavaScript.\",\n      \"topic_id\": \"test-topic\",\n      \"document_id\": \"test-doc\",\n      \"source\": \"manual\"\n    }\n  ]\n}"
+            }
+          }
+        },
+        {
+          "name": "Get Flashcard by ID",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/flashcards/{{flashcard_id}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "flashcards", "{{flashcard_id}}"]
+            }
+          }
+        },
+        {
+          "name": "Update Flashcard",
+          "request": {
+            "method": "PUT",
+            "url": {
+              "raw": "{{baseUrl}}/api/flashcards/{{flashcard_id}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "flashcards", "{{flashcard_id}}"]
+            },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"front_modified\": \"Co to jest TypeScript? (zmodyfikowane)\",\n  \"back_modified\": \"TypeScript to typowany nadzbiór JavaScript, który kompiluje się do czystego JavaScript. (zmodyfikowane)\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Approve Single Flashcard",
+          "request": {
+            "method": "PATCH",
+            "url": {
+              "raw": "{{baseUrl}}/api/flashcards/{{flashcard_id}}/approve",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "flashcards", "{{flashcard_id}}", "approve"]
+            }
+          }
+        },
+        {
+          "name": "Approve Multiple Flashcards",
+          "request": {
+            "method": "PATCH",
+            "url": {
+              "raw": "{{baseUrl}}/api/flashcards/approve-bulk",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "flashcards", "approve-bulk"]
+            },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"flashcard_ids\": [\"id1\", \"id2\", \"id3\"]\n}"
+            }
+          }
+        },
+        {
+          "name": "Approve Flashcards by Document",
+          "request": {
+            "method": "PATCH",
+            "url": {
+              "raw": "{{baseUrl}}/api/flashcards/approve-by-document",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "flashcards", "approve-by-document"]
+            },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"document_id\": \"test-doc\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Delete Flashcard",
+          "request": {
+            "method": "DELETE",
+            "url": {
+              "raw": "{{baseUrl}}/api/flashcards/{{flashcard_id}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "flashcards", "{{flashcard_id}}"]
+            }
+          }
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:3000",
+      "type": "string"
+    },
+    {
+      "key": "flashcard_id",
+      "value": "test-flashcard-id",
+      "type": "string"
+    }
+  ]
+} 

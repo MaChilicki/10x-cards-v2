@@ -1,0 +1,555 @@
+openapi: 3.0.0
+info:
+  title: 10xCards - API Fiszek
+  version: 1.0.0
+  description: |
+    API do zarządzania fiszkami w aplikacji 10xCards.
+    Umożliwia tworzenie, pobieranie, aktualizację i usuwanie fiszek oraz ich zatwierdzanie.
+
+servers:
+  - url: http://localhost:3000
+    description: Serwer lokalny
+
+components:
+  schemas:
+    FlashcardDto:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Unikalny identyfikator fiszki
+        front_original:
+          type: string
+          description: Oryginalna treść przedniej strony fiszki
+        back_original:
+          type: string
+          description: Oryginalna treść tylnej strony fiszki
+        front_modified:
+          type: string
+          description: Zmodyfikowana treść przedniej strony fiszki
+        back_modified:
+          type: string
+          description: Zmodyfikowana treść tylnej strony fiszki
+        topic_id:
+          type: string
+          format: uuid
+          description: Identyfikator tematu
+        document_id:
+          type: string
+          format: uuid
+          description: Identyfikator dokumentu źródłowego
+        source:
+          type: string
+          enum: [ai, manual]
+          description: Źródło pochodzenia fiszki
+        is_approved:
+          type: boolean
+          description: Czy fiszka została zatwierdzona
+        is_disabled:
+          type: boolean
+          description: Czy fiszka jest wyłączona
+        created_at:
+          type: string
+          format: date-time
+          description: Data utworzenia fiszki
+        modification_percentage:
+          type: number
+          description: Procent modyfikacji fiszki
+      required:
+        - front_original
+        - back_original
+        - topic_id
+        - document_id
+        - source
+
+    PaginationDto:
+      type: object
+      properties:
+        page:
+          type: integer
+          minimum: 1
+          description: Numer aktualnej strony
+        limit:
+          type: integer
+          minimum: 1
+          description: Liczba elementów na stronę
+        total:
+          type: integer
+          minimum: 0
+          description: Całkowita liczba elementów
+
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          type: string
+          description: Komunikat błędu
+
+  responses:
+    BadRequest:
+      description: Nieprawidłowe dane wejściowe
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    NotFound:
+      description: Zasób nie został znaleziony
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    ServerError:
+      description: Błąd serwera
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+
+paths:
+  /api/flashcards:
+    get:
+      summary: Pobierz listę fiszek
+      parameters:
+        - name: page
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            default: 1
+          description: Numer strony
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 10
+          description: Liczba elementów na stronę
+        - name: topic_id
+          in: query
+          schema:
+            type: string
+            format: uuid
+          description: Filtrowanie po temacie
+        - name: document_id
+          in: query
+          schema:
+            type: string
+            format: uuid
+          description: Filtrowanie po dokumencie
+        - name: source
+          in: query
+          schema:
+            type: string
+            enum: [ai, manual]
+          description: Filtrowanie po źródle
+        - name: is_approved
+          in: query
+          schema:
+            type: boolean
+          description: Filtrowanie po statusie zatwierdzenia
+      responses:
+        '200':
+          description: Lista fiszek
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/FlashcardDto'
+                  pagination:
+                    $ref: '#/components/schemas/PaginationDto'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '500':
+          $ref: '#/components/responses/ServerError'
+
+    post:
+      summary: Utwórz nowe fiszki
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                flashcards:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/FlashcardDto'
+              required:
+                - flashcards
+      responses:
+        '201':
+          description: Utworzone fiszki
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/FlashcardDto'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '500':
+          $ref: '#/components/responses/ServerError'
+
+  /api/flashcards/{id}:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+        description: Identyfikator fiszki
+    
+    get:
+      summary: Pobierz fiszkę po ID
+      responses:
+        '200':
+          description: Fiszka
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/FlashcardDto'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
+
+    put:
+      summary: Aktualizuj fiszkę
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                front_modified:
+                  type: string
+                back_modified:
+                  type: string
+              required:
+                - front_modified
+                - back_modified
+      responses:
+        '200':
+          description: Zaktualizowana fiszka
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/FlashcardDto'
+                  new_flashcard:
+                    $ref: '#/components/schemas/FlashcardDto'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
+
+    delete:
+      summary: Usuń fiszkę
+      responses:
+        '200':
+          description: Fiszka usunięta
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Fiszka usunięta pomyślnie"
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
+
+  /api/flashcards/{id}/approve:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+        description: Identyfikator fiszki
+    
+    patch:
+      summary: Zatwierdź pojedynczą fiszkę
+      responses:
+        '200':
+          description: Zatwierdzona fiszka
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/FlashcardDto'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
+
+  /api/flashcards/approve-bulk:
+    patch:
+      summary: Zatwierdź wiele fiszek
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                flashcard_ids:
+                  type: array
+                  items:
+                    type: string
+                    format: uuid
+              required:
+                - flashcard_ids
+      responses:
+        '200':
+          description: Zatwierdzone fiszki
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      approved_count:
+                        type: integer
+                      flashcards:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/FlashcardDto'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '500':
+          $ref: '#/components/responses/ServerError'
+
+  /api/flashcards/approve-by-document:
+    patch:
+      summary: Zatwierdź wszystkie fiszki dla dokumentu
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                document_id:
+                  type: string
+                  format: uuid
+              required:
+                - document_id
+      responses:
+        '200':
+          description: Zatwierdzone fiszki dla dokumentu
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      approved_count:
+                        type: integer
+                      flashcards:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/FlashcardDto'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
+
+  /api/flashcards/ai-regenerate:
+    post:
+      summary: Regeneruj fiszki AI
+      description: |
+        Endpoint do regeneracji fiszek dla istniejącego dokumentu lub tekstu.
+        Usuwa wszystkie fiszki AI dokumentu (hard-delete) niezależnie od ich statusu
+        i generuje nowy zestaw fiszek.
+        
+        Jeśli podano document_id, a nie podano topic_id, zostanie użyty topic_id z dokumentu.
+        
+        UWAGA: Operacja fizycznie usuwa wszystkie istniejące fiszki AI dla dokumentu,
+        niezależnie od ich statusu (is_disabled, is_modified, is_approved).
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                text:
+                  type: string
+                  minLength: 1000
+                  maxLength: 10000
+                  description: Tekst źródłowy do generacji fiszek
+                document_id:
+                  type: string
+                  format: uuid
+                  description: UUID dokumentu, dla którego mają być regenerowane fiszki
+                topic_id:
+                  type: string
+                  format: uuid
+                  description: UUID tematu, do którego mają być przypisane fiszki. Jeśli nie podano, a podano document_id, zostanie użyty topic_id z dokumentu.
+                force_regenerate:
+                  type: boolean
+                  default: false
+                  description: Wymuś regenerację nawet jeśli istnieją zatwierdzone fiszki
+              oneOf:
+                - required: [text]
+                - required: [document_id]
+      responses:
+        '200':
+          description: Pomyślnie wygenerowano nowe fiszki
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  flashcards:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/FlashcardDto'
+                    description: Lista wygenerowanych fiszek
+                  deleted_count:
+                    type: integer
+                    minimum: 0
+                    description: Liczba usuniętych (poprzednich) fiszek
+                required:
+                  - flashcards
+                  - deleted_count
+              example:
+                flashcards:
+                  - front_original: "Co to jest TypeScript?"
+                    back_original: "TypeScript to typowany nadzbiór JavaScript..."
+                    topic_id: "123e4567-e89b-12d3-a456-426614174000"
+                    document_id: "dbcc7c6e-51f9-4c32-b8f2-9019dca0d525"
+                    source: "ai"
+                    is_approved: false
+                deleted_count: 5
+        '400':
+          description: Nieprawidłowe dane wejściowe
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: object
+                    properties:
+                      code:
+                        type: string
+                        enum: [VALIDATION_ERROR]
+                      message:
+                        type: string
+                      details:
+                        type: object
+                        additionalProperties: true
+                required:
+                  - error
+              example:
+                error:
+                  code: "VALIDATION_ERROR"
+                  message: "Nieprawidłowe dane wejściowe"
+                  details:
+                    text: ["Tekst musi mieć co najmniej 1000 znaków"]
+        '404':
+          description: Nie znaleziono dokumentu
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: object
+                    properties:
+                      code:
+                        type: string
+                        enum: [DOCUMENT_NOT_FOUND]
+                      message:
+                        type: string
+                required:
+                  - error
+              example:
+                error:
+                  code: "DOCUMENT_NOT_FOUND"
+                  message: "Nie znaleziono dokumentu o podanym ID"
+        '415':
+          description: Nieprawidłowy format danych
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: object
+                    properties:
+                      code:
+                        type: string
+                        enum: [INVALID_CONTENT_TYPE]
+                      message:
+                        type: string
+                      details:
+                        type: string
+                required:
+                  - error
+              example:
+                error:
+                  code: "INVALID_CONTENT_TYPE"
+                  message: "Nieprawidłowy format danych"
+                  details: "Wymagany Content-Type: application/json"
+        '500':
+          description: Błąd serwera
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: object
+                    properties:
+                      code:
+                        type: string
+                        enum: [INTERNAL_SERVER_ERROR]
+                      message:
+                        type: string
+                      details:
+                        type: string
+                required:
+                  - error
+              example:
+                error:
+                  code: "INTERNAL_SERVER_ERROR"
+                  message: "Wystąpił błąd podczas regenerowania fiszek"
+      tags:
+        - Flashcards
+      security:
+        - supabase_auth: [] 

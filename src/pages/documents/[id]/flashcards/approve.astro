@@ -1,0 +1,14 @@
+---
+import Layout from "@/layouts/Layout.astro";
+import { FlashcardsApprovalView } from "@/components/flashcards/flashcards-approval-view";
+
+const { id } = Astro.params;
+
+if (!id) {
+  return Astro.redirect("/documents");
+}
+---
+
+<Layout title="Zatwierdzanie fiszek">
+  <FlashcardsApprovalView client:load documentId={id} />
+</Layout>

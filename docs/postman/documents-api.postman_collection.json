@@ -1,0 +1,149 @@
+{
+  "info": {
+    "name": "Documents API",
+    "description": "Kolekcja requestów do testowania API dokumentów",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Lista dokumentów",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "{{baseUrl}}/api/documents?page=1&limit=20&sort=-created_at&name=Wielkanoc",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "documents"],
+          "query": [
+            {
+              "key": "page",
+              "value": "1",
+              "description": "Numer strony"
+            },
+            {
+              "key": "limit",
+              "value": "20",
+              "description": "Liczba wyników na stronie"
+            },
+            {
+              "key": "sort",
+              "value": "-created_at",
+              "description": "Sortowanie (name, -created_at, created_at)"
+            },
+            {
+              "key": "name",
+              "value": "Wielkanoc",
+              "description": "Filtrowanie po nazwie"
+            }
+          ]
+        },
+        "description": "Pobiera paginowaną listę dokumentów z możliwością filtrowania"
+      }
+    },
+    {
+      "name": "Utwórz dokument",
+      "request": {
+        "method": "POST",
+        "url": {
+          "raw": "{{baseUrl}}/api/documents",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "documents"]
+        },
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\"name\":\"Polskie Tradycje Wielkanocne\",\"content\":\"Wielkanoc to najważniejsze święto w chrześcijańskim kalendarzu liturgicznym, które w Polsce obchodzone jest z wyjątkową pieczołowitością i bogactwem tradycji. Przygotowania do świąt rozpoczynają się już w Wielkim Tygodniu, który jest czasem szczególnej refleksji i przygotowań duchowych oraz kulinarnych.\\n\\nNiedziela Palmowa, rozpoczynająca Wielki Tydzień, to dzień, w którym wierni przynoszą do kościołów palmy wielkanocne. Tradycyjne polskie palmy są wykonywane ręcznie z suszonych kwiatów, ziół, wierzby i kolorowych wstążek. W niektórych regionach Polski, szczególnie na Kurpiach, organizowane są konkursy na najwyższą i najpiękniejszą palmę.\\n\\nWielka Sobota to dzień święcenia pokarmów. W pięknie przystrojonych koszyczkach wielkanocnych znajdują się symboliczne potrawy: jajka symbolizujące nowe życie, chleb - symbol ciała Chrystusa, sól - oznaczająca oczyszczenie, chrzan - symbol męki Pańskiej, wędlina - na znak końca postu oraz baranek wielkanocny - symbol zmartwychwstałego Chrystusa. Koszyczki są często ozdobione bukszpanem i białą serwetką.\\n\\nNiedziela Wielkanocna rozpoczyna się uroczystą mszą rezurekcyjną, odprawianą o świcie. Po powrocie do domu rodziny zasiadają do świątecznego śniadania, które rozpoczyna się dzieleniem się poświęconym jajkiem i składaniem życzeń. Na stołach królują tradycyjne potrawy: żurek wielkanocny, biała kiełbasa, pasztety, wędliny, sałatki oraz ciasta, wśród których nie może zabraknąć mazurka i babki wielkanocnej.\\n\\nCharakterystycznym elementem polskiej Wielkanocy jest zwyczaj malowania jajek. Pisanki, kraszanki czy oklejanki to prawdziwe dzieła sztuki ludowej, wykonywane różnymi technikami. Każdy region Polski ma swoje charakterystyczne wzory i kolory. Na Podhalu popularne są pisanki z motywami góralskimi, na Kaszubach dominują wzory geometryczne, a na Kurpiach - wycinanki.\\n\\nPoniedziałek Wielkanocny, znany jako lany poniedziałek lub śmigus-dyngus, to dzień pełen radości i zabawy. Zgodnie z tradycją, tego dnia oblewa się wodą innych, co ma zapewnić szczęście i pomyślność. Zwyczaj ten, choć obecnie nieco złagodzony, wciąż jest żywo kultywowany, szczególnie wśród młodzieży.\\n\\nW różnych regionach Polski kultywowane są także inne lokalne tradycje wielkanocne. Na Śląsku organizuje się procesje konne, na Podkarpaciu zachował się zwyczaj straży grobowych, a w Wielkopolsce można spotkać przebierańców chodzących z kogucikiem. Te regionalne zwyczaje dodają polskim obchodom Wielkanocy szczególnego kolorytu i świadczą o bogactwie naszej kultury ludowej.\\n\\nWielkanoc to również czas rodzinnych spotkań i podtrzymywania więzi międzypokoleniowych. To podczas tych świąt przekazywane są młodszym pokoleniom tradycje, przepisy kulinarne i opowieści rodzinne. Wspólne przygotowania do świąt, dekorowanie domów, pieczenie ciast i malowanie pisanek to okazja do spędzenia czasu razem i kultywowania polskich tradycji.\",\"topic_id\":\"123e4567-e89b-12d3-a456-426614174000\"}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "description": "Tworzy nowy dokument i inicjuje generowanie fiszek"
+      }
+    },
+    {
+      "name": "Pobierz dokument",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "{{baseUrl}}/api/documents/{{documentId}}",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "documents", "{{documentId}}"]
+        },
+        "description": "Pobiera szczegóły dokumentu o podanym ID"
+      }
+    },
+    {
+      "name": "Aktualizuj dokument",
+      "request": {
+        "method": "PUT",
+        "url": {
+          "raw": "{{baseUrl}}/api/documents/{{documentId}}",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "documents", "{{documentId}}"]
+        },
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\"name\":\"Polskie Tradycje Wielkanocne - Aktualizacja\",\"content\":\"Wielkanoc to najważniejsze święto w chrześcijańskim kalendarzu liturgicznym, które w Polsce obchodzone jest z wyjątkową pieczołowitością i bogactwem tradycji. Przygotowania do świąt rozpoczynają się już w Wielkim Tygodniu, który jest czasem szczególnej refleksji i przygotowań duchowych oraz kulinarnych.\\n\\nNiedziela Palmowa, rozpoczynająca Wielki Tydzień, to dzień, w którym wierni przynoszą do kościołów palmy wielkanocne. Tradycyjne polskie palmy są wykonywane ręcznie z suszonych kwiatów, ziół, wierzby i kolorowych wstążek. W niektórych regionach Polski, szczególnie na Kurpiach, organizowane są konkursy na najwyższą i najpiękniejszą palmę.\\n\\nWielka Sobota to dzień święcenia pokarmów. W pięknie przystrojonych koszyczkach wielkanocnych znajdują się symboliczne potrawy: jajka symbolizujące nowe życie, chleb - symbol ciała Chrystusa, sól - oznaczająca oczyszczenie, chrzan - symbol męki Pańskiej, wędlina - na znak końca postu oraz baranek wielkanocny - symbol zmartwychwstałego Chrystusa. Koszyczki są często ozdobione bukszpanem i białą serwetką.\\n\\nNiedziela Wielkanocna rozpoczyna się uroczystą mszą rezurekcyjną, odprawianą o świcie. Po powrocie do domu rodziny zasiadają do świątecznego śniadania, które rozpoczyna się dzieleniem się poświęconym jajkiem i składaniem życzeń. Na stołach królują tradycyjne potrawy: żurek wielkanocny, biała kiełbasa, pasztety, wędliny, sałatki oraz ciasta, wśród których nie może zabraknąć mazurka i babki wielkanocnej.\\n\\nCharakterystycznym elementem polskiej Wielkanocy jest zwyczaj malowania jajek. Pisanki, kraszanki czy oklejanki to prawdziwe dzieła sztuki ludowej, wykonywane różnymi technikami. Każdy region Polski ma swoje charakterystyczne wzory i kolory. Na Podhalu popularne są pisanki z motywami góralskimi, na Kaszubach dominują wzory geometryczne, a na Kurpiach - wycinanki.\\n\\nPoniedziałek Wielkanocny, znany jako lany poniedziałek lub śmigus-dyngus, to dzień pełen radości i zabawy. Zgodnie z tradycją, tego dnia oblewa się wodą innych, co ma zapewnić szczęście i pomyślność. Zwyczaj ten, choć obecnie nieco złagodzony, wciąż jest żywo kultywowany, szczególnie wśród młodzieży.\\n\\nW różnych regionach Polski kultywowane są także inne lokalne tradycje wielkanocne. Na Śląsku organizuje się procesje konne, na Podkarpaciu zachował się zwyczaj straży grobowych, a w Wielkopolsce można spotkać przebierańców chodzących z kogucikiem. Te regionalne zwyczaje dodają polskim obchodom Wielkanocy szczególnego kolorytu i świadczą o bogactwie naszej kultury ludowej.\\n\\nWielkanoc to również czas rodzinnych spotkań i podtrzymywania więzi międzypokoleniowych. To podczas tych świąt przekazywane są młodszym pokoleniom tradycje, przepisy kulinarne i opowieści rodzinne. Wspólne przygotowania do świąt, dekorowanie domów, pieczenie ciast i malowanie pisanek to okazja do spędzenia czasu razem i kultywowania polskich tradycji.\\n\\nDodatkowo warto wspomnieć o współczesnych aspektach świętowania Wielkanocy w Polsce. Mimo zachowania tradycyjnych elementów, święta te ewoluują wraz ze społeczeństwem. Coraz częściej pojawiają się nowe interpretacje tradycyjnych potraw, ekologiczne podejście do dekoracji świątecznych czy łączenie lokalnych zwyczajów z międzynarodowymi inspiracjami.\"}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "description": "Aktualizuje istniejący dokument"
+      }
+    },
+    {
+      "name": "Usuń dokument",
+      "request": {
+        "method": "DELETE",
+        "url": {
+          "raw": "{{baseUrl}}/api/documents/{{documentId}}",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "documents", "{{documentId}}"]
+        },
+        "description": "Usuwa dokument i powiązane z nim fiszki"
+      }
+    }
+  ],
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "exec": [""]
+      }
+    },
+    {
+      "listen": "test",
+      "script": {
+        "type": "text/javascript",
+        "exec": [""]
+      }
+    }
+  ],
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:3000",
+      "type": "string"
+    },
+    {
+      "key": "documentId",
+      "value": "123e4567-e89b-12d3-a456-426614174000",
+      "type": "string"
+    }
+  ]
+} 

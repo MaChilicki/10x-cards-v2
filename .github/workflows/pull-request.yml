@@ -1,0 +1,174 @@
+name: Pull Request Workflow
+
+on:
+  pull_request:
+    branches: [ main ]
+    types: [ opened, synchronize, reopened ]
+
+jobs:
+  lint:
+    name: Lintowanie kodu
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout kodu
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: ./.github/workflows/composite-actions/setup-node
+
+      - name: Uruchomienie lintera
+        run: npm run lint
+
+  unit-tests:
+    name: Testy jednostkowe
+    needs: [lint]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout kodu
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: ./.github/workflows/composite-actions/setup-node
+
+      - name: Uruchomienie testów jednostkowych z coverage
+        run: npm run test:coverage
+
+      - name: Zapisanie raportu pokrycia testów
+        uses: actions/upload-artifact@v4
+        with:
+          name: unit-test-coverage
+          path: coverage/
+          retention-days: 7
+
+  e2e-tests:
+    name: Testy end-to-end
+    needs: [lint]
+    runs-on: ubuntu-latest
+    environment: integration
+    steps:
+      - name: Checkout kodu
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: ./.github/workflows/composite-actions/setup-node
+
+      - name: Instalacja przeglądarek Playwright
+        run: npx playwright install chromium
+
+      - name: Uruchomienie testów E2E
+        run: npm run test:e2e -- --workers=1
+        env:
+          # Sekrety ze środowiska integration (zignoruj ostrzeżenia edytora - sekrety istnieją w GitHub)
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
+          # Sekrety z poziomu repozytorium (zignoruj ostrzeżenia edytora - sekrety istnieją w GitHub)
+          OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
+          OPENROUTER_BASE_URL: ${{ secrets.OPENROUTER_BASE_URL }}
+          OPENROUTER_DEFAULT_MODEL: ${{ secrets.OPENROUTER_DEFAULT_MODEL }}
+          E2E_USERNAME_ID: ${{ secrets.E2E_USERNAME_ID }}
+          E2E_USERNAME: ${{ secrets.E2E_USERNAME }}
+          E2E_PASSWORD: ${{ secrets.E2E_PASSWORD }}
+
+      - name: Zapisanie raportu testów E2E
+        uses: actions/upload-artifact@v4
+        with:
+          name: e2e-test-results
+          path: test-results/
+          retention-days: 7
+
+  status-comment:
+    name: Komentarz o statusie
+    needs: [lint, unit-tests, e2e-tests]
+    runs-on: ubuntu-latest
+    if: always()
+    steps:
+      - name: Checkout kodu
+        uses: actions/checkout@v4
+
+      - name: Pobranie raportów z testów jednostkowych
+        uses: actions/download-artifact@v4
+        with:
+          name: unit-test-coverage
+          path: coverage
+        if: needs.unit-tests.result == 'success'
+
+      - name: Pobranie raportów z testów E2E
+        uses: actions/download-artifact@v4
+        with:
+          name: e2e-test-results
+          path: test-results
+        if: needs.e2e-tests.result == 'success'
+
+      - name: Dodanie komentarza do PR
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const fs = require('fs');
+            
+            // Statusy zadań
+            const lintStatus = '${{ needs.lint.result }}';
+            const unitTestsStatus = '${{ needs.unit-tests.result }}';
+            const e2eTestsStatus = '${{ needs.e2e-tests.result }}';
+            
+            // Ikony statusu
+            const getStatusIcon = (status) => {
+              return status === 'success' ? '✅' : (status === 'cancelled' ? '⚪' : '❌');
+            };
+            
+            // Przygotowanie podsumowania testów jednostkowych
+            let unitTestSummary = 'Nie znaleziono raportu z testów jednostkowych';
+            try {
+              if (fs.existsSync('./coverage/coverage-summary.json')) {
+                const unitCoverage = JSON.parse(fs.readFileSync('./coverage/coverage-summary.json', 'utf8'));
+                const total = unitCoverage.total;
+                unitTestSummary = `## Pokrycie testów jednostkowych
+                - **Linie**: ${total.lines.pct}%
+                - **Instrukcje**: ${total.statements.pct}%
+                - **Funkcje**: ${total.functions.pct}%
+                - **Gałęzie**: ${total.branches.pct}%`;
+              }
+            } catch (error) {
+              console.error('Błąd odczytu raportu testów jednostkowych:', error);
+            }
+            
+            // Przygotowanie podsumowania testów E2E
+            let e2eSummary = 'Nie znaleziono raportu z testów E2E';
+            try {
+              if (fs.existsSync('./test-results/e2e-results.json')) {
+                const e2eResults = JSON.parse(fs.readFileSync('./test-results/e2e-results.json', 'utf8'));
+                const passed = e2eResults.suites.reduce((acc, suite) => acc + suite.specs.filter(spec => spec.ok).length, 0);
+                const total = e2eResults.suites.reduce((acc, suite) => acc + suite.specs.length, 0);
+                e2eSummary = `## Wyniki testów E2E
+                - **Zaliczone**: ${passed}/${total} (${Math.round(passed/total*100)}%)`;
+              }
+            } catch (error) {
+              console.error('Błąd odczytu raportu testów E2E:', error);
+            }
+            
+            // Statusy podsumowań
+            const unitSummary = unitTestsStatus === 'success' ? unitTestSummary : 'Testy jednostkowe nie zakończyły się sukcesem.';
+            const e2eSumm = e2eTestsStatus === 'success' ? e2eSummary : 'Testy E2E nie zakończyły się sukcesem.';
+            
+            // Utworzenie komentarza do PR
+            const comment = `# Raport z testów dla Pull Request
+            
+            ## Status zadań
+            ${getStatusIcon(lintStatus)} **Lintowanie**: ${lintStatus}
+            ${getStatusIcon(unitTestsStatus)} **Testy jednostkowe**: ${unitTestsStatus} (wymagało poprawnego lintowania)
+            ${getStatusIcon(e2eTestsStatus)} **Testy E2E**: ${e2eTestsStatus} (wymagało poprawnego lintowania)
+            
+            ${unitSummary}
+            
+            ${e2eSumm}
+            
+            *Wygenerowano automatycznie przez GitHub Actions*`;
+            
+            // Dodanie komentarza do PR
+            const issue_number = context.issue.number;
+            github.rest.issues.createComment({
+              issue_number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: comment
+            }); 

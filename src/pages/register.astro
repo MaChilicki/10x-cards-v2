@@ -1,0 +1,25 @@
+---
+import AuthLayout from "@/layouts/AuthLayout.astro";
+import { RegisterForm } from "@/components/auth/register-form";
+import { logger } from "@/lib/services/logger.service";
+
+// Wyłączamy prerenderowanie dla stron wymagających weryfikacji sesji
+export const prerender = false;
+
+// Sprawdzamy sesję użytkownika
+const { user } = Astro.locals;
+
+logger.info(`Próba dostępu do strony rejestracji ${user ? `dla zalogowanego użytkownika ${user.id}` : 'dla niezalogowanego użytkownika'}`);
+
+// Jeśli użytkownik jest już zalogowany, przekierowujemy na stronę główną
+if (user) {
+  logger.warn(`Próba dostępu do strony rejestracji przez zalogowanego użytkownika ${user.id}`);
+  return Astro.redirect('/');
+}
+
+logger.info('Dostęp do strony rejestracji przyznany');
+---
+
+<AuthLayout title="Rejestracja">
+  <RegisterForm client:load />
+</AuthLayout>

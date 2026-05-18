@@ -1,0 +1,75 @@
+{
+  "info": {
+    "name": "10xCards API",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Flashcards",
+      "item": [
+        {
+          "name": "Regenerate AI Flashcards",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"document_id\": \"dbcc7c6e-51f9-4c32-b8f2-9019dca0d525\",\n  \"force_regenerate\": true\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/flashcards/ai-regenerate",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "flashcards", "ai-regenerate"]
+            },
+            "description": "Regeneruje fiszki AI dla podanego dokumentu. Usuwa istniejące fiszki AI (soft-delete) i generuje nowe."
+          },
+          "response": [
+            {
+              "name": "Sukces",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"document_id\": \"dbcc7c6e-51f9-4c32-b8f2-9019dca0d525\",\n  \"force_regenerate\": true\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/api/flashcards/ai-regenerate",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["api", "flashcards", "ai-regenerate"]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"flashcards\": [\n    {\n      \"front_original\": \"Co to jest TypeScript?\",\n      \"back_original\": \"TypeScript to typowany nadzbiór JavaScript...\",\n      \"topic_id\": \"123e4567-e89b-12d3-a456-426614174000\",\n      \"document_id\": \"dbcc7c6e-51f9-4c32-b8f2-9019dca0d525\",\n      \"source\": \"ai\",\n      \"is_approved\": false\n    }\n  ],\n  \"disabled_count\": 5\n}"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:3000",
+      "type": "string"
+    }
+  ]
+} 

@@ -1,0 +1,16 @@
+---
+import BaseLayout from "@/layouts/Layout.astro";
+import { DocumentEditView } from "@/components/documents/document-edit-view";
+
+// Pobierz stan nawigacji
+const topicId = Astro.url.searchParams.get("topicId") || "";
+const topicTitle = Astro.url.searchParams.get("topicTitle") || "";
+
+if (!topicId) {
+  return Astro.redirect("/topics");
+}
+---
+
+<BaseLayout title="Nowy dokument">
+  <DocumentEditView topicId={topicId} topicTitle={topicTitle} client:load />
+</BaseLayout>

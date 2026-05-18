@@ -1,0 +1,19 @@
+---
+import { APP_CONSTANTS } from "@/constants/app";
+import Layout from "../layouts/Layout.astro";
+---
+
+<Layout title="Strona główna">
+  <div class="flex-1 flex items-center justify-center">
+    <div class="text-center space-y-8">
+      <div class="flex flex-col items-center space-y-4">
+        <img src="/logo.svg" alt={`${APP_CONSTANTS.name} Logo`} class="h-24 w-24" />
+        <h1 class="text-4xl font-bold">Witaj w {APP_CONSTANTS.name}</h1>
+        <p class="text-muted-foreground mt-2">{APP_CONSTANTS.slogan}</p>
+      </div>
+      <p class="text-lg text-muted-foreground max-w-md mx-auto">
+        Wybierz sekcję z menu powyżej, aby rozpocząć pracę z fiszkami.
+      </p>
+    </div>
+  </div>
+</Layout>

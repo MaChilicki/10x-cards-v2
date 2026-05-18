@@ -1,0 +1,22 @@
+name: "Konfiguracja środowiska Node.js"
+description: "Konfiguruje środowisko Node.js z użyciem .nvmrc i instaluje zależności"
+
+inputs:
+  cache-dependency-path:
+    description: "Ścieżka do pliku package-lock.json (opcjonalna)"
+    required: false
+    default: ""
+
+runs:
+  using: "composite"
+  steps:
+    - name: Konfiguracja Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version-file: '.nvmrc'
+        cache: 'npm'
+        cache-dependency-path: ${{ inputs.cache-dependency-path || '' }}
+
+    - name: Instalacja zależności
+      run: npm ci
+      shell: bash 

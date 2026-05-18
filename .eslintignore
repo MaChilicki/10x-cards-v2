@@ -1,0 +1,2 @@
+# Ignoruj komponenty shadcn/ui
+src/components/ui/* 

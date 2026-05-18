@@ -1,0 +1,226 @@
+openapi: 3.0.0
+info:
+  title: API Dokumentów
+  description: API do zarządzania dokumentami w aplikacji
+  version: 1.0.0
+
+paths:
+  /api/documents:
+    get:
+      summary: Pobierz listę dokumentów
+      description: Zwraca paginowaną listę dokumentów z możliwością filtrowania
+      parameters:
+        - name: page
+          in: query
+          description: Numer strony (większy od 0)
+          schema:
+            type: integer
+            minimum: 1
+            default: 1
+        - name: limit
+          in: query
+          description: Liczba wyników na stronie (max 100)
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 20
+        - name: sort
+          in: query
+          description: Pole i kierunek sortowania
+          schema:
+            type: string
+            enum: [name, -created_at, created_at]
+            default: -created_at
+        - name: name
+          in: query
+          description: Filtrowanie po nazwie dokumentu
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Lista dokumentów
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DocumentsListResponse'
+        '400':
+          description: Nieprawidłowe parametry zapytania
+        '500':
+          description: Błąd serwera
+
+    post:
+      summary: Utwórz nowy dokument
+      description: Tworzy nowy dokument i inicjuje generowanie fiszek
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DocumentCreate'
+      responses:
+        '201':
+          description: Dokument został utworzony
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Document'
+        '400':
+          description: Nieprawidłowe dane wejściowe
+        '415':
+          description: Nieprawidłowy format danych
+        '500':
+          description: Błąd serwera
+
+  /api/documents/{id}:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        description: ID dokumentu
+        schema:
+          type: string
+          format: uuid
+    
+    get:
+      summary: Pobierz dokument
+      description: Zwraca szczegóły dokumentu o podanym ID
+      responses:
+        '200':
+          description: Dokument
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Document'
+        '404':
+          description: Nie znaleziono dokumentu
+        '500':
+          description: Błąd serwera
+
+    put:
+      summary: Aktualizuj dokument
+      description: Aktualizuje istniejący dokument
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DocumentUpdate'
+      responses:
+        '200':
+          description: Dokument został zaktualizowany
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Document'
+        '400':
+          description: Nieprawidłowe dane wejściowe
+        '404':
+          description: Nie znaleziono dokumentu
+        '415':
+          description: Nieprawidłowy format danych
+        '500':
+          description: Błąd serwera
+
+    delete:
+      summary: Usuń dokument
+      description: Usuwa dokument i powiązane z nim fiszki
+      responses:
+        '200':
+          description: Dokument został usunięty
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Dokument został pomyślnie usunięty"
+        '404':
+          description: Nie znaleziono dokumentu
+        '500':
+          description: Błąd serwera
+
+components:
+  schemas:
+    Document:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+          minLength: 1
+        content:
+          type: string
+          minLength: 1000
+          maxLength: 10000
+        user_id:
+          type: string
+          format: uuid
+        topic_id:
+          type: string
+          format: uuid
+          nullable: true
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+        has_flashcards:
+          type: boolean
+          nullable: true
+      required:
+        - id
+        - name
+        - content
+        - user_id
+        - created_at
+        - updated_at
+
+    DocumentCreate:
+      type: object
+      properties:
+        name:
+          type: string
+          minLength: 1
+        content:
+          type: string
+          minLength: 1000
+          maxLength: 10000
+        topic_id:
+          type: string
+          format: uuid
+      required:
+        - name
+        - content
+
+    DocumentUpdate:
+      type: object
+      properties:
+        name:
+          type: string
+          minLength: 1
+        content:
+          type: string
+          minLength: 1000
+          maxLength: 10000
+      required:
+        - name
+        - content
+
+    DocumentsListResponse:
+      type: object
+      properties:
+        documents:
+          type: array
+          items:
+            $ref: '#/components/schemas/Document'
+        total:
+          type: integer
+          minimum: 0
+      required:
+        - documents
+        - total 

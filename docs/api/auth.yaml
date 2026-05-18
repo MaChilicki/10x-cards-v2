@@ -1,0 +1,252 @@
+openapi: 3.0.0
+info:
+  title: API Autoryzacji
+  version: 1.0.0
+  description: API do obsługi autoryzacji użytkowników
+
+servers:
+  - url: /
+    description: Serwer produkcyjny
+
+components:
+  schemas:
+    User:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Unikalny identyfikator użytkownika
+        email:
+          type: string
+          format: email
+          description: Adres email użytkownika
+        email_confirmed_at:
+          type: string
+          format: date-time
+          nullable: true
+          description: Data potwierdzenia adresu email
+      required:
+        - id
+        - email
+
+    Error:
+      type: object
+      properties:
+        error:
+          type: string
+          description: Komunikat błędu
+      required:
+        - error
+
+    Message:
+      type: object
+      properties:
+        message:
+          type: string
+          description: Komunikat sukcesu
+      required:
+        - message
+
+  securitySchemes:
+    sessionAuth:
+      type: apiKey
+      in: cookie
+      name: sb-access-token
+      description: Token sesji JWT przechowywany w httpOnly cookie
+
+paths:
+  /api/auth/login:
+    post:
+      summary: Logowanie użytkownika
+      tags:
+        - Autoryzacja
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                  format: email
+                password:
+                  type: string
+                  format: password
+              required:
+                - email
+                - password
+      responses:
+        '200':
+          description: Pomyślne logowanie
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  user:
+                    $ref: '#/components/schemas/User'
+                required:
+                  - user
+        '400':
+          description: Nieprawidłowe dane
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /api/auth/register:
+    post:
+      summary: Rejestracja nowego użytkownika
+      tags:
+        - Autoryzacja
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                  format: email
+                password:
+                  type: string
+                  format: password
+              required:
+                - email
+                - password
+      responses:
+        '200':
+          description: Pomyślna rejestracja
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  user:
+                    $ref: '#/components/schemas/User'
+                required:
+                  - user
+        '400':
+          description: Nieprawidłowe dane
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /api/auth/logout:
+    post:
+      summary: Wylogowanie użytkownika
+      tags:
+        - Autoryzacja
+      security:
+        - sessionAuth: []
+      responses:
+        '200':
+          description: Pomyślne wylogowanie
+        '400':
+          description: Błąd wylogowania
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /api/auth/reset-password:
+    post:
+      summary: Wysłanie linku do resetowania hasła
+      tags:
+        - Autoryzacja
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                  format: email
+              required:
+                - email
+      responses:
+        '200':
+          description: Link wysłany
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Message'
+        '400':
+          description: Nieprawidłowy email
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /api/auth/change-password:
+    post:
+      summary: Zmiana hasła użytkownika
+      tags:
+        - Autoryzacja
+      security:
+        - sessionAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                password:
+                  type: string
+                  format: password
+              required:
+                - password
+      responses:
+        '200':
+          description: Hasło zmienione
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Message'
+        '400':
+          description: Nieprawidłowe hasło
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Brak autoryzacji
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /api/auth/me:
+    get:
+      summary: Pobranie informacji o zalogowanym użytkowniku
+      tags:
+        - Autoryzacja
+      security:
+        - sessionAuth: []
+      responses:
+        '200':
+          description: Informacje o użytkowniku
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  user:
+                    $ref: '#/components/schemas/User'
+                required:
+                  - user
+        '401':
+          description: Brak autoryzacji
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+security:
+  - sessionAuth: [] 

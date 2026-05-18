@@ -1,0 +1,14 @@
+---
+import Layout from "@/layouts/Layout.astro";
+import { DocumentDetailView } from "@/components/documents/document-detail-view";
+
+const { id } = Astro.params;
+
+if (!id) {
+  return Astro.redirect("/404");
+}
+---
+
+<Layout title="Szczegóły dokumentu">
+  <DocumentDetailView client:load documentId={id} />
+</Layout>

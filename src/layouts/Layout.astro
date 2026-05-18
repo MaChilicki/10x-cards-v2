@@ -1,0 +1,80 @@
+---
+import { Footer } from "@/components/ui/footer";
+import { MainNav } from "@/components/layout/main-nav";
+import { APP_CONSTANTS } from "@/constants/app";
+import { supabaseConfig } from "@/lib/config/supabase.config";
+import { Toaster } from "@/components/ui/sonner";
+import "../styles/global.css";
+
+interface Props {
+  title?: string;
+  requireAuth?: boolean;
+}
+
+const { title = APP_CONSTANTS.name, requireAuth = false } = Astro.props;
+const { user } = Astro.locals;
+
+// Przekierowanie dla niezalogowanych użytkowników na chronionych stronach
+if (requireAuth && !user) {
+  return Astro.redirect("/login");
+}
+
+const astroLocals = {
+  user,
+  supabaseUrl: supabaseConfig.url,
+  supabaseAnonKey: supabaseConfig.anonKey,
+};
+---
+
+<!doctype html>
+<html lang="pl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width" />
+    <link rel="icon" type="image/png" href="/favicon.png" />
+    <meta name="generator" content={Astro.generator} />
+    <meta name="description" content={APP_CONSTANTS.description} />
+    <meta name="author" content={APP_CONSTANTS.author} />
+    <title>{title}</title>
+    <script is:inline define:vars={{ astroLocals }}>
+      window.__ASTRO_LOCALS__ = astroLocals;
+
+      // Obsługa wygaśnięcia sesji
+      document.addEventListener("DOMContentLoaded", () => {
+        const checkSession = async () => {
+          try {
+            const response = await fetch("/api/auth/session");
+            if (!response.ok) {
+              window.location.href = "/login";
+            }
+          } catch (error) {
+            window.location.href = "/login";
+          }
+        };
+
+        // Sprawdzaj sesję co 5 minut
+        setInterval(checkSession, 5 * 60 * 1000);
+      });
+    </script>
+  </head>
+  <body>
+    <div class="flex flex-col min-h-screen" data-testid="main-layout">
+      <MainNav client:only="react" />
+      <main class="flex-1" data-testid="main-content">
+        <slot />
+      </main>
+      <Footer />
+    </div>
+    <Toaster client:load />
+  </body>
+</html>
+
+<style>
+  html,
+  body {
+    margin: 0;
+    width: 100%;
+    height: 100vh;
+    overflow-x: hidden;
+  }
+</style>

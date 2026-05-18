@@ -1,0 +1,13 @@
+---
+import TopicDetailView from "@/components/topics/topic-detail-view";
+import Layout from "@/layouts/Layout.astro";
+
+const { id } = Astro.params;
+if (!id) {
+  return Astro.redirect("/404");
+}
+---
+
+<Layout title="Szczegóły tematu">
+  <TopicDetailView client:only="react" topicId={id} />
+</Layout>

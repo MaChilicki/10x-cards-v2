@@ -1,0 +1,281 @@
+openapi: 3.0.0
+info:
+  title: 10xCards - API Tematów
+  version: 1.0.0
+  description: |
+    API do zarządzania tematami w aplikacji 10xCards.
+    Umożliwia tworzenie, pobieranie, aktualizację i usuwanie tematów.
+
+servers:
+  - url: http://localhost:3000
+    description: Serwer lokalny
+
+components:
+  schemas:
+    Topic:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Unikalny identyfikator tematu
+        name:
+          type: string
+          description: Nazwa tematu
+        description:
+          type: string
+          description: Opis tematu
+        parent_id:
+          type: string
+          format: uuid
+          nullable: true
+          description: ID tematu nadrzędnego (jeśli istnieje)
+        created_at:
+          type: string
+          format: date-time
+          description: Data utworzenia tematu
+        updated_at:
+          type: string
+          format: date-time
+          description: Data ostatniej aktualizacji tematu
+      required:
+        - name
+
+    TopicCreate:
+      type: object
+      properties:
+        name:
+          type: string
+          description: Nazwa tematu
+        description:
+          type: string
+          description: Opis tematu
+        parent_id:
+          type: string
+          format: uuid
+          nullable: true
+          description: ID tematu nadrzędnego
+      required:
+        - name
+
+    TopicUpdate:
+      type: object
+      properties:
+        name:
+          type: string
+          description: Nazwa tematu
+        description:
+          type: string
+          description: Opis tematu
+        parent_id:
+          type: string
+          format: uuid
+          nullable: true
+          description: ID tematu nadrzędnego
+      required:
+        - name
+
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          type: object
+          properties:
+            code:
+              type: string
+              enum: [INVALID_PARAMETERS, INVALID_INPUT, TOPIC_EXISTS, TOPIC_NOT_FOUND, INTERNAL_SERVER_ERROR]
+              description: Kod błędu
+            message:
+              type: string
+              description: Komunikat błędu
+            details:
+              type: object
+              description: Szczegóły błędu (opcjonalne)
+
+paths:
+  /api/topics:
+    get:
+      summary: Pobierz listę tematów
+      parameters:
+        - name: name
+          in: query
+          schema:
+            type: string
+          description: Filtrowanie po nazwie tematu
+        - name: parent_id
+          in: query
+          schema:
+            type: string
+            format: uuid
+          description: Filtrowanie po temacie nadrzędnym
+      responses:
+        '200':
+          description: Lista tematów
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Topic'
+        '400':
+          description: Nieprawidłowe parametry zapytania
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Błąd serwera
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+    post:
+      summary: Utwórz nowy temat
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TopicCreate'
+      responses:
+        '201':
+          description: Temat został utworzony
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Topic'
+        '400':
+          description: Nieprawidłowe dane wejściowe
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '409':
+          description: Temat o podanej nazwie już istnieje
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Błąd serwera
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/topics/{id}:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+        description: Identyfikator tematu
+
+    get:
+      summary: Pobierz temat po ID
+      responses:
+        '200':
+          description: Temat
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Topic'
+        '404':
+          description: Temat nie został znaleziony
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Błąd serwera
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+    put:
+      summary: Aktualizuj temat
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TopicUpdate'
+      responses:
+        '200':
+          description: Temat został zaktualizowany
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Topic'
+        '400':
+          description: Nieprawidłowe dane wejściowe
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Temat nie został znaleziony
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '409':
+          description: Temat o podanej nazwie już istnieje
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '415':
+          description: Nieprawidłowy format danych
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Błąd serwera
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+    delete:
+      summary: Usuń temat
+      responses:
+        '200':
+          description: Temat został usunięty
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Temat został pomyślnie usunięty"
+        '400':
+          description: Nieprawidłowe żądanie
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Temat nie został znaleziony
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '409':
+          description: Nie można usunąć tematu z zależnościami
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Błąd serwera
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse' 

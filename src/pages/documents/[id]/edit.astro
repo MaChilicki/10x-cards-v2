@@ -1,0 +1,10 @@
+---
+import BaseLayout from "@/layouts/Layout.astro";
+import { DocumentEditView } from "@/components/documents/document-edit-view";
+
+const { id } = Astro.params;
+---
+
+<BaseLayout title="Edycja dokumentu">
+  <DocumentEditView documentId={id} client:load />
+</BaseLayout>
