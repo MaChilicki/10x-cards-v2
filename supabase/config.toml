@@ -160,7 +160,7 @@ otp_length = 6
 otp_expiry = 3600
 
 # Uncomment to customize email template
-[auth.email.template.confirm_signup]
+[auth.email.template.confirmation]
 subject = "Potwierdź swój email - 10xCards"
 content_path = "./supabase/templates/verify-email.html"
 
