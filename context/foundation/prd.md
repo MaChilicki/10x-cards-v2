@@ -1,5 +1,8 @@
 ---
 project: 10xCards v2
+version: 1
+status: draft
+created: 2026-05-19
 context_type: brownfield
 product_type: web-app
 target_scale:
@@ -10,41 +13,11 @@ timeline_budget:
   delivery_weeks: 3
   hard_deadline: null
   after_hours_only: true
-created: 2026-05-19
-updated: 2026-05-20
-checkpoint:
-  current_phase: 8
-  phases_completed: [1, 2, 3, 4, 5, 6, 7]
-  gray_areas_resolved:
-    - topic: context type
-      decision: Brownfield - existing 10xCards app is the base for MVP v2.
-    - topic: current system
-      decision: Preserve the current Astro/Supabase/OpenRouter flashcard management app and extend it into a learning-loop product.
-    - topic: content source
-      decision: Build the initial flashcard base from Polish markdown and plain text lesson files via paste or single-file drag-and-drop.
-    - topic: quality gate
-      decision: Include flashcard quality review before generated cards become learning material.
-    - topic: repetition algorithm
-      decision: Use a ready-made SM-2 implementation for MVP v2, wrapped behind an app service boundary.
-    - topic: access model
-      decision: Preserve the existing authenticated-user model; no new roles in MVP v2.
-    - topic: product framing
-      decision: Preserve the existing product surface as a web app for a small initial learner base.
-    - topic: MVP delivery window
-      decision: Shape the first releasable v2 change for three weeks of after-hours work.
-    - topic: course material privacy
-      decision: Treat imported course markdown as private user-scoped content for MVP.
-    - topic: recall grading UI
-      decision: Use simple Again, Hard, Good, Easy labels mapped internally to SM-2 grades.
-    - topic: quality and coverage check
-      decision: Include a lightweight AI quality and lesson-coverage report as review support, not as an automatic activation gate.
-  frs_drafted: 15
-  quality_check_status: accepted
 ---
 
 ## Current System Overview
 
-10xCards is an existing web app for managing topics, documents, and flashcards. It supports user registration and login, AI-assisted flashcard generation via OpenRouter, manual flashcard management, and an approval flow for AI-generated flashcards.
+10xCards is an existing web app for managing topics, documents, and flashcards. It supports user registration and login, AI-assisted flashcard generation, manual flashcard management, and an approval flow for AI-generated flashcards.
 
 Current stack described by the project: Astro, TypeScript, React, Tailwind CSS, shadcn/ui, Supabase Auth/Postgres, and OpenRouter. The current README marks the learning and spaced repetition system as planned but not implemented.
 
@@ -56,7 +29,7 @@ Current user base: this is a course project, not a production rollout. Today it 
 
 The app can already help create and manage flashcards, but it does not yet close the learning loop. For 10xCards v2, the motivating gap is turning course lesson markdown into high-quality flashcards that can be reviewed over time, not just generated and stored.
 
-The first concrete content source is the Polish 10xDevs3 course material downloaded into markdown or plain text. The product should help a learner convert those lessons into a usable flashcard base, keep source traceability, review generated cards before use, and schedule repetitions with a ready-made algorithm.
+The first concrete content source is Polish course material downloaded into markdown or plain text. The product should help a learner convert those lessons into a usable flashcard base, keep source traceability, review generated cards before use, and schedule repetitions with a ready-made algorithm.
 
 This change is needed now because the current app has clear learning gaps: it can generate flashcards, but it does not support repeated review, does not verify generated card quality, and does not help assess whether learning is improving. The goal of v2 is to make flashcards a practical tool for retaining the most important course knowledge.
 
@@ -64,7 +37,7 @@ Current workaround: manually reading lesson markdowns and manually creating or a
 
 ## User & Persona
 
-Primary persona: a Polish-speaking 10xDevs3 learner/developer who is building their own course project and wants to learn the course material while developing 10xCards v2.
+Primary persona: a Polish-speaking learner/developer who is building their own project and wants to learn course material while developing 10xCards v2.
 
 Moment of use: after importing or opening course lesson markdown, the learner wants the app to propose flashcards, let them reject or improve weak cards, and later run review sessions based on due cards.
 
@@ -91,7 +64,7 @@ Moment of use: after importing or opening course lesson markdown, the learner wa
 ### Guardrails
 
 - Existing login, topics, documents, flashcards, and approval flows must not regress.
-- Existing user data is not destructively migrated.
+- Existing user data is not destructively changed.
 - Generated cards never become active learning cards without learner approval.
 - MVP must not include a custom advanced spaced repetition algorithm.
 - Quality and coverage feedback must not automatically activate cards without learner approval.
@@ -125,6 +98,7 @@ Before: Generated flashcards could be manually approved or rejected, but there w
 - The app distinguishes pending, approved, and rejected cards.
 - Approved cards become eligible for learning sessions.
 - Rejected cards do not appear in learning sessions.
+- The learner sees a lightweight quality and coverage report before making the final approval decision.
 
 ### US-03: Run a spaced repetition session
 
@@ -146,45 +120,45 @@ Before: Existing topic, document, and flashcard management was the working base 
 
 - **Given** existing topics, documents, and flashcards
 - **When** MVP v2 features are added
-- **Then** existing CRUD and approval behavior remains available
+- **Then** existing content and approval behavior remains available
 
 #### Acceptance Criteria
 
-- Existing flashcards are not deleted or migrated destructively.
-- Existing AI generation endpoints and UI flows keep working unless explicitly replaced by the MVP change.
+- Existing flashcards are not deleted or changed destructively.
+- Existing AI generation and manual flashcard flows keep working unless explicitly replaced by the MVP change.
 
 ## Scope of Change
 
-- [new] Signed-in learner can manually paste content or drag-and-drop one Polish markdown/plain text lesson file as a document. Priority: must-have
-- [new] Signed-in learner can generate flashcard candidates from a lesson document. Priority: must-have
-- [new] System can store source lesson metadata for generated flashcards. Priority: must-have
-- [new] System can mark generated flashcards as pending by default. Priority: must-have
-- [new] System can produce a lightweight AI quality and coverage report for a generated card set. Priority: must-have
-- [new] Learner can approve, edit, or reject pending flashcards. Priority: must-have
-- [new] System can prevent rejected cards from appearing in learning sessions. Priority: must-have
-- [new] System can select due approved cards for a review session. Priority: must-have
-- [new] Learner can reveal card answers during a session. Priority: must-have
-- [new] Learner can grade recall with simple buttons mapped to SM-2 grades. Priority: must-have
-- [new] System can update SM-2 repetition state after each graded answer. Priority: must-have
-- [new] Learner can see current session progress. Priority: must-have
-- [new] Learner can see next review dates for reviewed cards. Priority: must-have
-- [modified] Existing AI prompts are tuned for course-learning flashcards. Priority: must-have
-- [modified] Approved flashcards are treated as learning-ready, not only content-management-ready. Priority: must-have
-- [preserved] Existing document-to-flashcard generation keeps working for non-course documents. Priority: must-have
-- [preserved] Existing manual flashcard creation and editing remain available. Priority: must-have
-- [preserved] Existing auth, topic, document, flashcard, and approval flows must keep working. Priority: must-have
-- [preserved] Existing Supabase-backed user data ownership must remain intact. Priority: must-have
+- [new] Signed-in learner can manually paste content or drag-and-drop one Polish markdown/plain text lesson file as a document.
+- [new] Signed-in learner can generate flashcard candidates from a lesson document.
+- [new] System can store source lesson metadata for generated flashcards.
+- [new] System can mark generated flashcards as pending by default.
+- [new] System can produce a lightweight AI quality and coverage report for a generated card set.
+- [new] Learner can approve, edit, or reject pending flashcards.
+- [new] System can prevent rejected cards from appearing in learning sessions.
+- [new] System can select due approved cards for a review session.
+- [new] Learner can reveal card answers during a session.
+- [new] Learner can grade recall with simple buttons mapped to SM-2 grades.
+- [new] System can update SM-2 repetition state after each graded answer.
+- [new] Learner can see current session progress.
+- [new] Learner can see next review dates for reviewed cards.
+- [modified] Existing AI prompts are tuned for course-learning flashcards.
+- [modified] Approved flashcards are treated as learning-ready, not only content-management-ready.
+- [preserved] Existing document-to-flashcard generation keeps working for non-course documents.
+- [preserved] Existing manual flashcard creation and editing remain available.
+- [preserved] Existing auth, topic, document, flashcard, and approval flows must keep working.
+- [preserved] Existing user data ownership must remain intact.
 
 ## Constraints & Compatibility
 
 - Preserve current authenticated-user data boundaries.
 - Preserve existing topic, document, and flashcard data.
-- Avoid destructive schema changes unless backed by migrations and a rollback path.
-- Keep the repetition algorithm replaceable behind an app-owned service interface.
-- Keep course markdown handling compatible with an Obsidian-style local markdown repository.
-- Existing auth routes, topic/document/flashcard APIs, and approval workflows must continue to work for current data.
-- Any schema changes for repetition state, review sessions, or source metadata must be additive or backed by a rollback path.
-- Existing OpenRouter-based generation should keep working for non-course documents unless deliberately replaced by the new prompt path.
+- Avoid destructive data changes unless backed by an explicit recovery path.
+- Keep the repetition algorithm replaceable behind an app-owned boundary.
+- Keep course markdown handling compatible with a local markdown repository.
+- Existing auth routes, topic/document/flashcard flows, and approval workflows must continue to work for current data.
+- Any changes for repetition state, review sessions, or source metadata must preserve current data and allow recovery if the change must be rolled back.
+- Existing AI generation should keep working for non-course documents unless deliberately replaced by the new prompt path.
 - The first MVP does not need a full directory importer; manual paste or single-file drag-and-drop is enough.
 - The quality and coverage report is advisory. Manual approval remains the final activation decision.
 
@@ -194,7 +168,7 @@ The app turns trusted lesson source material into reviewable flashcards, gives t
 
 This changes 10xCards from a flashcard creation and management app into a learning-loop app. The key new decisions are whether a card is ready for learning, whether the generated set misses important lesson areas, and when each approved card should be reviewed next.
 
-The repetition algorithm should be ready-made SM-2 for MVP v2. The app should own the service boundary and persisted state shape, not leak a package API through the product.
+The repetition algorithm should be ready-made SM-2 for MVP v2. The app should own the product boundary and persisted learning state shape, not leak implementation-specific details through the product.
 
 ## Access Control Changes
 
@@ -202,24 +176,10 @@ No access control changes planned for MVP v2. Preserve the current authenticated
 
 Imported course markdown is treated as private user-scoped content for MVP. Shared seed data, public decks, and team workspaces remain out of scope unless a later decision explicitly changes that.
 
-## Non-Functional Requirements
-
-- A learner receives visible feedback for AI generation or review-session actions that take longer than two seconds.
-- A review answer update must be durable before the next card is shown as completed.
-- Course-derived flashcards remain scoped to the authenticated user's workspace unless a later decision explicitly introduces shared seed data.
-- The app remains usable in a local development environment with local Supabase.
-- Course-derived flashcards can be traced back to at least the source lesson/document.
-- Existing non-course flashcard generation and manual flashcard workflows remain available after the change.
-- The quality and coverage report is generated for the learner within the same review workflow as the generated cards; it does not need full analytics or historical trend tracking in MVP.
-
-## Timeline acknowledgment
-
-The MVP is shaped for three weeks of after-hours work. Scope stays limited to the end-to-end learning loop: pasted or single-file-dropped lesson document, candidate generation, lightweight quality/coverage report, manual approval, due-card session, SM-2 state update, and basic progress.
-
 ## Non-Goals
 
 - No custom advanced repetition algorithm in MVP v2; use a ready-made SM-2 implementation.
-- No FSRS migration in MVP v2; keep it as a later evaluation candidate.
+- No switch to FSRS in MVP v2; keep it as a later evaluation candidate.
 - No shared decks or team workspaces in MVP v2.
 - No public marketplace of course flashcards in MVP v2.
 - No mobile app in MVP v2.
@@ -240,23 +200,3 @@ The MVP is shaped for three weeks of after-hours work. Scope stays limited to th
 3. **Quality and coverage report storage shape** - Owner: user/Codex. Decide whether MVP stores the report result, recomputes it on demand, or keeps it as transient review feedback.
 4. **Exact SM-2 grade mapping** - Owner: user/Codex. Confirm numeric mapping for Again, Hard, Good, and Easy before implementation.
 5. **Assessment/demo source data shape** - Owner: user. Decide whether course markdown for assessment is prepared as per-user imported data, repository seed/demo data, or local developer data.
-
-## Quality cross-check
-
-- Access Control: present.
-- Business Logic: present as a one-sentence domain rule.
-- Project artifacts: present.
-- Timeline-cost acknowledgment: present.
-- Non-Goals: present.
-- Preserved behavior: present in constraints and scope.
-
-## Forward: technical-roadmap
-
-- Candidate package: `@open-spaced-repetition/sm-2`.
-- Service boundary: `src/lib/services/spaced-repetition.service.ts`.
-- Existing note: `docs/decisions/spaced-repetition.md`.
-- Future candidate after MVP: `ts-fsrs`, if the product needs richer scheduling.
-- Future expansion: local directory importer for course markdown files.
-- Future expansion: heading-level source traceability and lesson coverage map.
-- Future expansion: persistent Quality Gate checklist with reasons, dashboard, and regeneration suggestions.
-- Future expansion: richer progress analytics, streaks, reminders, shared decks, and broader file-format import.

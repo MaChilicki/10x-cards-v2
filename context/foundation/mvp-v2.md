@@ -45,10 +45,10 @@ The app converts trusted lesson markdown into candidate flashcards, gates their 
 ## First Valuable Flow
 
 1. Learner signs in.
-2. Learner imports or selects Polish course lesson markdown.
+2. Learner pastes Polish course lesson markdown or drag-and-drops a single `.md` or `.txt` file.
 3. App creates or updates a document for that lesson.
 4. Learner asks AI to generate flashcard candidates.
-5. App applies a Quality Gate checklist and marks generated cards as pending.
+5. App runs a lightweight AI quality and lesson-coverage check and marks generated cards as pending.
 6. Learner approves, edits, or rejects generated cards.
 7. Approved cards become eligible for learning.
 8. Learner starts a review session.
@@ -63,7 +63,7 @@ This is the MVP. Anything that does not support this loop is secondary.
 
 ### Course Markdown Source
 
-- Import or register selected Polish lesson markdown or plain text files as documents.
+- Paste selected Polish lesson markdown or drag-and-drop one markdown/plain text file as a document.
 - Preserve lesson title and source path.
 - Generate cards only from Polish lesson content.
 - Keep the imported content scoped to the signed-in user for MVP.
@@ -75,11 +75,11 @@ This is the MVP. Anything that does not support this loop is secondary.
 - Avoid cards based on trivia, navigation text, duplicated fragments, or vague summaries.
 - Keep generated cards pending until reviewed.
 
-### Quality Gate
+### Lightweight Quality and Coverage Check
 
-Quality Gate is a product feature, not only a prompt instruction.
+Quality feedback is a product feature, not only a prompt instruction. For the three-week MVP it should stay lightweight and advisory.
 
-For MVP, a card passes the gate only if:
+For MVP, the app should flag cards that likely fail these criteria:
 
 - it tests one concept or decision at a time,
 - the answer is faithful to the source lesson,
@@ -88,7 +88,9 @@ For MVP, a card passes the gate only if:
 - it is useful for learning course/project decisions,
 - it is not a near-duplicate of another pending or approved card from the same lesson.
 
-MVP implementation may combine automatic checks with manual approval. Manual approval remains the final decision.
+The generated set should also include a basic coverage report: which obvious lesson headings or key topics appear covered by at least one card, and which appear missing.
+
+MVP implementation may combine automatic checks with manual approval. Manual approval remains the final decision. The report does not automatically activate cards.
 
 ### Approval Flow
 
@@ -129,27 +131,31 @@ MVP implementation may combine automatic checks with manual approval. Manual app
 - No public marketplace of course flashcards.
 - No mobile app.
 - No import of PDF, DOCX, HTML, EPUB, images, audio, or video in MVP v2.
-- No full authenticated course-platform crawler inside the app.
+- No full local directory importer or authenticated course-platform crawler inside the app.
 - No integrations with external learning platforms.
 - No video/audio processing for flashcard generation.
 - No email, push, or calendar reminders for overdue reviews in MVP v2.
 - No multilingual version; MVP is Polish-only.
 - No broad Obsidian sync. Source markdown compatibility is enough.
+- No persistent Quality Gate dashboard or historical coverage analytics.
 
 ## Success Criteria
 
 ### Primary
 
-- A learner can generate flashcards from at least one Polish 10xDevs3 markdown lesson.
+- A learner can manually paste or drag-and-drop one Polish 10xDevs3 markdown/plain text lesson as a document.
+- A learner can generate flashcards from that lesson.
 - A learner can approve, edit, or reject generated cards before learning.
 - A learner can complete a review session using approved cards.
 - Review outcomes update next review dates through SM-2.
+- A learner can see basic AI feedback about weak cards and obvious lesson coverage gaps.
 
 ### Product Quality
 
 - At least 75% of generated flashcards from a representative lesson are accepted after edit/reject review.
 - At least 75% of the learner's new cards in the MVP flow come from AI generation rather than manual creation.
 - Every learning card can be traced back to its source lesson/document.
+- Course reviewers can understand and exercise the complete MVP learning loop during project assessment.
 
 ### Guardrails
 
@@ -159,20 +165,21 @@ MVP implementation may combine automatic checks with manual approval. Manual app
 
 ## Functional Requirements
 
-- FR-001: Signed-in learner can import or register a Polish markdown or plain text lesson as a document. Priority: must-have
+- FR-001: Signed-in learner can manually paste content or drag-and-drop one Polish markdown/plain text lesson file as a document. Priority: must-have
 - FR-002: Signed-in learner can generate flashcard candidates from a lesson document. Priority: must-have
 - FR-003: System can store source lesson metadata for generated flashcards. Priority: must-have
 - FR-004: System can mark generated flashcards as pending by default. Priority: must-have
-- FR-005: Learner can approve, edit, or reject pending flashcards. Priority: must-have
-- FR-006: System can prevent rejected cards from appearing in learning sessions. Priority: must-have
-- FR-007: System can select due approved cards for a review session. Priority: must-have
-- FR-008: Learner can reveal card answers during a session. Priority: must-have
-- FR-009: Learner can grade recall with simple buttons mapped to SM-2 grades. Priority: must-have
-- FR-010: System can update SM-2 repetition state after each graded answer. Priority: must-have
-- FR-011: Learner can see current session progress. Priority: must-have
-- FR-012: Learner can see next review dates for reviewed cards. Priority: must-have
-- FR-013: Existing document-to-flashcard generation keeps working for non-course documents. Priority: must-have
-- FR-014: Learner can still manually create and edit flashcards. Priority: must-have
+- FR-005: System can produce a lightweight AI quality and coverage report for a generated card set. Priority: must-have
+- FR-006: Learner can approve, edit, or reject pending flashcards. Priority: must-have
+- FR-007: System can prevent rejected cards from appearing in learning sessions. Priority: must-have
+- FR-008: System can select due approved cards for a review session. Priority: must-have
+- FR-009: Learner can reveal card answers during a session. Priority: must-have
+- FR-010: Learner can grade recall with simple buttons mapped to SM-2 grades. Priority: must-have
+- FR-011: System can update SM-2 repetition state after each graded answer. Priority: must-have
+- FR-012: Learner can see current session progress. Priority: must-have
+- FR-013: Learner can see next review dates for reviewed cards. Priority: must-have
+- FR-014: Existing document-to-flashcard generation keeps working for non-course documents. Priority: must-have
+- FR-015: Learner can still manually create and edit flashcards. Priority: must-have
 
 ## Minimal Data Decisions
 
@@ -187,20 +194,21 @@ Use existing concepts where possible:
 Likely additions or confirmations:
 
 - source lesson metadata on document or flashcard level
-- Quality Gate result/status if not already represented by existing approval fields
+- lightweight quality and coverage report result/status if it is persisted rather than transient
 - review grade mapping stored in review history
 
 ## Implementation Slices
 
 ### Slice 1 - Source and Prompt
 
-- Decide exact import path for local markdown.
+- Use manual paste or single-file drag-and-drop for local markdown.
 - Improve generation prompt for course lessons.
 - Preserve lesson metadata.
 
-### Slice 2 - Quality Gate
+### Slice 2 - Lightweight Quality and Coverage
 
 - Define card quality checklist in code/prompt.
+- Add a basic AI report for weak cards and obvious coverage gaps.
 - Keep cards pending.
 - Improve approval/edit/reject workflow if needed.
 
@@ -224,8 +232,8 @@ Likely additions or confirmations:
 
 ## Open Decisions Before PRD
 
-1. Exact markdown/plain text import shape: local script, admin/dev import, or in-app file picker.
+1. Post-MVP markdown/plain text import shape: local script, admin/dev import, or in-app file picker.
 2. Source traceability depth: lesson-level only or heading-level anchors.
-3. Final Quality Gate scoring: binary pass/fail or checklist with reasons.
+3. Final Quality Gate persistence: transient report, binary status, checklist with reasons, or both.
 4. Final recall UI labels and exact mapping to SM-2 grades.
-5. Whether course markdown should be seed data or private user data in production.
+5. Whether course markdown for assessment should be prepared as per-user imported data, repository seed/demo data, or local developer data.

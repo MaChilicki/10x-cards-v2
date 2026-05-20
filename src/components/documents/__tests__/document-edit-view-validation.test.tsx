@@ -1,6 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
-import userEvent from "@testing-library/user-event";
 import { DocumentEditView } from "../document-edit-view";
 
 // Mockowanie modułów
@@ -89,8 +88,8 @@ describe("DocumentEditView - walidacja", () => {
     });
 
     // Wypełnij pola
-    await userEvent.type(screen.getByLabelText("Tytuł dokumentu"), "Testowy tytuł");
-    await userEvent.type(screen.getByLabelText("Treść dokumentu"), "Zbyt krótka treść");
+    fireEvent.change(screen.getByLabelText("Tytuł dokumentu"), { target: { value: "Testowy tytuł" } });
+    fireEvent.change(screen.getByLabelText("Treść dokumentu"), { target: { value: "Zbyt krótka treść" } });
 
     // Przygotowujemy się na oczekiwany błąd
     const handleSubmitPromise = () =>
@@ -117,14 +116,10 @@ describe("DocumentEditView - walidacja", () => {
       expect(screen.getByLabelText("Tytuł dokumentu")).toBeInTheDocument();
     });
 
-    // Działanie - wypełniam pola z zbyt długim tytułem (ponad 100 znaków)
-    // Tutaj zmieniłem getByLabelText("Tytuł") na getByLabelText("Tytuł dokumentu")
-    await userEvent.type(screen.getByLabelText("Tytuł dokumentu"), "A".repeat(101));
-
-    await userEvent.type(
-      screen.getByLabelText("Treść dokumentu"),
-      "Testowa treść dokumentu o odpowiedniej długości.".repeat(40) // Min. 1000 znaków
-    );
+    fireEvent.change(screen.getByLabelText("Tytuł dokumentu"), { target: { value: "A".repeat(101) } });
+    fireEvent.change(screen.getByLabelText("Treść dokumentu"), {
+      target: { value: "Testowa treść dokumentu o odpowiedniej długości.".repeat(40) },
+    });
 
     // Kliknij przycisk zapisz, aby wywołać walidację
     // Ten test weryfikuje tylko, że formularz z za długim tytułem zostanie odrzucony
@@ -132,7 +127,10 @@ describe("DocumentEditView - walidacja", () => {
     const submitButton = screen.getByText("Zapisz");
     expect(submitButton).toBeInTheDocument();
 
-    // Ten test kończymy tutaj - w rzeczywistej implementacji po kliknięciu przycisku
-    // z nieprawidłowymi danymi formularz zostanie zwalidowany i odrzucony
+    fireEvent.click(submitButton);
+
+    await waitFor(() => {
+      expect(screen.getByText("Tytuł nie może przekraczać 100 znaków")).toBeInTheDocument();
+    });
   });
 });

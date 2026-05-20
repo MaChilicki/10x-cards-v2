@@ -72,7 +72,7 @@ To run 10xCards on your local machine, follow these steps:
 -   For more specific test commands (watch mode, coverage, UI mode, E2E tests), see the "Unit Testing (Vitest)" and "End-to-End Testing (Playwright)" sections below.
 
 ## Project Structure Overview
-The project follows a standard structure for Astro applications. Key directories include:
+The project follows a standard Astro application structure extended with 10x workflow documentation. Key directories include:
 -   `./src`: Contains all source code.
 -   `./src/pages`: Astro pages, defining the routes of the application.
 -   `./src/pages/api`: API endpoints.
@@ -84,7 +84,15 @@ The project follows a standard structure for Astro applications. Key directories
 -   `./src/middleware`: Astro middleware.
 -   `./public`: Static assets directly served.
 -   `./supabase/migrations`: Database migration files.
-(For detailed project structure guidelines, please refer to internal project documentation.)
+-   `./context/foundation`: Living product and architecture context for the 10x workflow, including `shape-notes.md`, `prd.md`, and project-level MVP notes.
+-   `./context/foundation/archive`: Historical copies of superseded foundation documents, for example restarted `shape-notes` sessions.
+-   `./context/changes`: Change-scoped work artifacts created by 10x workflow skills when a change needs its own plan or research.
+-   `./context/archive`: Completed change folders moved from `context/changes`; read-only by convention.
+-   `./docs`: Technical documentation, API contracts, Postman collections, deployment notes, and implementation decisions.
+-   `./docs/decisions`: Durable technical decisions, such as the spaced repetition approach.
+-   `./.agents`: Project-local 10x skills and agent instructions used to keep course workflow reproducible.
+
+The `context/` structure is not a separate project. It is the 10x workflow layer for this application. Product-level documents live in `context/foundation/`; implementation-facing documentation remains in `docs/`.
 
 ## Application Features
 

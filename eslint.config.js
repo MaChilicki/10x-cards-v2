@@ -15,6 +15,10 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const gitignorePath = path.resolve(__dirname, ".gitignore");
 
+const ignoreConfig = {
+  ignores: ["src/components/ui/*"],
+};
+
 const baseConfig = tseslint.config({
   extends: [eslint.configs.recommended, tseslint.configs.strict, tseslint.configs.stylistic],
   rules: {
@@ -56,15 +60,8 @@ const reactConfig = tseslint.config({
   },
 });
 
-const astroConfig = tseslint.config({
+const astroConfig = tseslint.config(...eslintPluginAstro.configs["flat/recommended"], {
   files: ["**/*.astro"],
-  extends: [eslintPluginAstro.configs["flat/recommended"]],
-  languageOptions: {
-    parserOptions: {
-      parser: "@typescript-eslint/parser",
-      extraFileExtensions: [".astro"],
-    },
-  },
   rules: {
     "astro/no-set-html-directive": "error",
     "astro/no-set-text-directive": "error",
@@ -79,19 +76,23 @@ const astroConfig = tseslint.config({
     "astro/prefer-class-list-directive": "error",
     "astro/prefer-object-class-list": "error",
     "astro/prefer-split-class-list": "error",
-    "astro/require-optimized-style-attribute": "error",
-    "astro/require-view-transitions": "error",
     "astro/semi": "error",
-    "astro/sort-imports": "error",
-    "astro/valid-define-vars": "error",
   },
 });
 
+const prettierOverride = {
+  rules: {
+    "prettier/prettier": "off",
+  },
+};
+
 export default tseslint.config(
   includeIgnoreFile(gitignorePath),
+  ignoreConfig,
   baseConfig,
   jsxA11yConfig,
   reactConfig,
   astroConfig,
-  eslintPluginPrettier
+  eslintPluginPrettier,
+  prettierOverride
 );

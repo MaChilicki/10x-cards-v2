@@ -34,6 +34,7 @@ export function AuthForm<T extends z.ZodType>({
   refreshSessionAfterSubmit = true,
   "data-testid": dataTestId,
 }: AuthFormProps<T>) {
+  const [isHydrated, setIsHydrated] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [generalError, setGeneralError] = useState<string | null>(null);
   const { refreshSession } = useAuth();
@@ -41,6 +42,10 @@ export function AuthForm<T extends z.ZodType>({
   const form = useForm<z.infer<T>>({
     resolver: zodResolver(schema),
   });
+
+  useEffect(() => {
+    setIsHydrated(true);
+  }, []);
 
   // Przekaż instancję formularza do rodzica
   useEffect(() => {
@@ -102,7 +107,7 @@ export function AuthForm<T extends z.ZodType>({
   };
 
   return (
-    <form onSubmit={form.handleSubmit(onFormSubmit)} className="space-y-4" data-testid={dataTestId}>
+    <form method="post" onSubmit={form.handleSubmit(onFormSubmit)} className="space-y-4" data-testid={dataTestId}>
       {generalError && (
         <Alert variant="destructive" data-testid="auth-form-error">
           <AlertDescription>{generalError}</AlertDescription>
@@ -111,7 +116,7 @@ export function AuthForm<T extends z.ZodType>({
 
       {children(form)}
 
-      <Button type="submit" className="w-full" disabled={isSubmitting} data-testid="auth-submit-button">
+      <Button type="submit" className="w-full" disabled={!isHydrated || isSubmitting} data-testid="auth-submit-button">
         {isSubmitting ? (
           <>
             <LoadingSpinner className="mr-2 h-4 w-4" />

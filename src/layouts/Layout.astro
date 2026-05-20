@@ -36,7 +36,7 @@ const astroLocals = {
     <meta name="description" content={APP_CONSTANTS.description} />
     <meta name="author" content={APP_CONSTANTS.author} />
     <title>{title}</title>
-    <script is:inline define:vars={{ astroLocals }}>
+    <script is:inline define:vars={{ astroLocals: astroLocals }}>
       window.__ASTRO_LOCALS__ = astroLocals;
 
       // Obsługa wygaśnięcia sesji
@@ -47,7 +47,7 @@ const astroLocals = {
             if (!response.ok) {
               window.location.href = "/login";
             }
-          } catch (error) {
+          } catch {
             window.location.href = "/login";
           }
         };

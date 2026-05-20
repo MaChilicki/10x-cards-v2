@@ -1,6 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen, fireEvent, waitFor, act } from "@testing-library/react";
-import userEvent from "@testing-library/user-event";
 import { DocumentEditView } from "../document-edit-view";
 import { toast } from "sonner";
 
@@ -73,8 +72,10 @@ describe("DocumentEditView - zapisywanie", () => {
     });
 
     // Wypełniamy pola formularza
-    await userEvent.type(screen.getByLabelText("Tytuł dokumentu"), "Testowy tytuł");
-    await userEvent.type(screen.getByLabelText("Treść dokumentu"), "Testowa treść".repeat(100)); // Aby przekroczyć minimum 1000 znaków
+    fireEvent.change(screen.getByLabelText("Tytuł dokumentu"), { target: { value: "Testowy tytuł" } });
+    fireEvent.change(screen.getByLabelText("Treść dokumentu"), {
+      target: { value: "Testowa treść".repeat(100) },
+    });
 
     // Klikamy przycisk "Zapisz"
     fireEvent.click(screen.getByText("Zapisz"));
@@ -112,8 +113,10 @@ describe("DocumentEditView - zapisywanie", () => {
     });
 
     // Wypełniamy pola formularza
-    await userEvent.type(screen.getByLabelText("Tytuł dokumentu"), "Testowy tytuł");
-    await userEvent.type(screen.getByLabelText("Treść dokumentu"), "Testowa treść".repeat(100));
+    fireEvent.change(screen.getByLabelText("Tytuł dokumentu"), { target: { value: "Testowy tytuł" } });
+    fireEvent.change(screen.getByLabelText("Treść dokumentu"), {
+      target: { value: "Testowa treść".repeat(100) },
+    });
 
     // Używamy act aby bezpiecznie obsłużyć asynchroniczne operacje i oczekiwane błędy
     await act(async () => {
@@ -145,8 +148,10 @@ describe("DocumentEditView - zapisywanie", () => {
     });
 
     // Wypełniamy pola formularza
-    await userEvent.type(screen.getByLabelText("Tytuł dokumentu"), "Testowy tytuł");
-    await userEvent.type(screen.getByLabelText("Treść dokumentu"), "Testowa treść".repeat(100));
+    fireEvent.change(screen.getByLabelText("Tytuł dokumentu"), { target: { value: "Testowy tytuł" } });
+    fireEvent.change(screen.getByLabelText("Treść dokumentu"), {
+      target: { value: "Testowa treść".repeat(100) },
+    });
 
     // Używamy act aby bezpiecznie obsłużyć asynchroniczne operacje i oczekiwane błędy
     await act(async () => {
